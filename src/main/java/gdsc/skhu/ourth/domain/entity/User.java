@@ -30,7 +30,12 @@ public class User implements UserDetails {
     @Column(name = "username", nullable = false)
     private String username;
 
-    //
+    // 지역
+    @Column(name = "region", nullable = false)
+    private String region;
+
+    @OneToMany(mappedBy = "user")
+    private List<Mission> missions = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
