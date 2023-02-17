@@ -34,6 +34,10 @@ public class User implements UserDetails {
     @Column(name = "region", nullable = false)
     private String region;
 
+    // 포인트
+    @Column(name = "point")
+    private Integer point;
+
     @OneToMany(mappedBy = "user")
     private List<Mission> missions = new ArrayList<>();
 
