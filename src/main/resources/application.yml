@@ -19,5 +19,5 @@ spring:
     init:
       mode: always
 jwt:
-  secret: ${JWT_SECRET}
+  secret: Z2RzYy1za2h1LWphdmEtYmFja2VuZC1qd3Qtc3R1ZHktZGVjZW1iZXItMjh0aC1oYW5naWxsZWU=
   token-validity-in-milliseconds: 86400000
