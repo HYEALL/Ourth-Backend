@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class UserMission extends BaseTimeEntity {
+public class UserMission extends BaseTime {
 
     // 유저에게 주어진 미션과 완료 여부를 저장하는 테이블
 

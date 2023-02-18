@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class User extends BaseTimeEntity implements UserDetails {
+public class User extends BaseTime implements UserDetails {
 
     // 유저 정보를 저장하는 테이블
 
