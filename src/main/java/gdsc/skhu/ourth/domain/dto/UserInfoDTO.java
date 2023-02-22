@@ -1,5 +1,7 @@
 package gdsc.skhu.ourth.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import gdsc.skhu.ourth.domain.School;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +19,10 @@ public class UserInfoDTO {
 
     private String username;
 
-    private String region;
+    @JsonIgnore
+    private School school;
+
+    private String schoolName;
 
     private Long point;
 
