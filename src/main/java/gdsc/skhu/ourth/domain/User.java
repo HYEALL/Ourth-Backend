@@ -1,5 +1,6 @@
 package gdsc.skhu.ourth.domain;
 
+import gdsc.skhu.ourth.domain.dto.UserDTO;
 import gdsc.skhu.ourth.domain.dto.UserInfoDTO;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,7 +36,9 @@ public class User extends BaseTime implements UserDetails {
 
     private String username; // 유저 이름
 
-    private String region; // 거주 지역
+    @ManyToOne(targetEntity = School.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_id")
+    private School school; // 거주 지역
 
     private Long point; // 기여 포인트
 
@@ -47,16 +50,25 @@ public class User extends BaseTime implements UserDetails {
     @Builder.Default
     private List<String> roles = new ArrayList<>();
 
-    public UserInfoDTO toDTO() {
+    public UserInfoDTO toInfoDTO() {
         return UserInfoDTO.builder()
                 .id(id)
                 .email(email)
                 .username(username)
-                .region(region)
+                .school(school)
                 .point(point)
                 .userMissions(userMissions.stream()
                         .map(UserMission::toDTO)
                         .collect(Collectors.toList()))
+                .build();
+    }
+
+    public UserDTO.Rank toRankDTO() {
+        return UserDTO.Rank.builder()
+                .id(id)
+                .username(username)
+                .point(point)
+                .school(school)
                 .build();
     }
 

@@ -5,13 +5,9 @@ import gdsc.skhu.ourth.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -35,7 +31,6 @@ public class UserController {
     public ResponseEntity<String> join(@Valid @RequestBody UserDTO.SignUp dto) throws Exception {
         return ResponseEntity.ok(userService.signUp(dto).toString() + " 회원가입 완료");
     }
-
 
     // 토큰 값으로 내 정보 확인 - 유저
     @GetMapping("/user")

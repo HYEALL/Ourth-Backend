@@ -1,8 +1,10 @@
 package gdsc.skhu.ourth.service;
 
+import gdsc.skhu.ourth.domain.School;
 import gdsc.skhu.ourth.domain.User;
 import gdsc.skhu.ourth.domain.dto.*;
 import gdsc.skhu.ourth.jwt.TokenProvider;
+import gdsc.skhu.ourth.repository.SchoolRepository;
 import gdsc.skhu.ourth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,6 +27,7 @@ public class UserService {
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final SchoolRepository schoolRepository;
 
     // 로그인
     public TokenDTO login(UserDTO.Login dto) {
@@ -62,10 +67,12 @@ public class UserService {
             throw new Exception("비밀번호가 일치하지 않습니다.");
         }
 
-        if(dto.getRegion().isEmpty()) {
+        if(dto.getSchoolName().isEmpty()) {
             throw new Exception("거주 지역을 입력하지 않았습니다.");
         }
 
+        School school = schoolRepository.findBySchoolName(dto.getSchoolName()).get();
+        dto.setSchool(school);
         User user = userRepository.save(dto.toEntity());
         user.encodePassword(passwordEncoder);
 
@@ -74,8 +81,9 @@ public class UserService {
 
     // 유저의 정보를 보여줌
     public UserInfoDTO userInfo(Principal principal) {
-        User user = userRepository.findByEmail(principal.getName()).get();
-        return user.toDTO();
+        UserInfoDTO dto = userRepository.findByEmail(principal.getName()).get().toInfoDTO();
+        dto.setSchoolName(dto.getSchool().getSchoolName());
+        return dto;
     }
 
 }

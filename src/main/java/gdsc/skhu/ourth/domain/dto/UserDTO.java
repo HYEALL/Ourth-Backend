@@ -1,6 +1,8 @@
 package gdsc.skhu.ourth.domain.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import gdsc.skhu.ourth.domain.School;
 import gdsc.skhu.ourth.domain.User;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -32,8 +34,11 @@ public class UserDTO {
         @NotBlank(message = "닉네임을 입력해주세요")
         private String username;
 
+        @JsonIgnore
+        private School school;
+
         @NotBlank(message = "거주 지역을 입력해주세요")
-        private String region;
+        private String schoolName;
 
         // 회원가입시 0포인트부터 시작
         private Long point;
@@ -43,12 +48,17 @@ public class UserDTO {
             return User.builder()
                     .email(email)
                     .password(password)
-                    .region(region)
+                    .school(school)
                     .roles(new ArrayList<>(Collections.singleton("USER")))
                     .username(username)
                     .point(0L)
                     .build();
         }
+
+        public void setSchool(School school) {
+            this.school = school;
+        }
+
     }
 
     // 로그인 요청 DTO
@@ -58,6 +68,22 @@ public class UserDTO {
         private String email;
 
         private String password;
+
+    }
+
+    @Data
+    @Builder
+    public static class Rank {
+
+        private Long id;
+
+        private String username;
+
+        private School school;
+
+        private String schoolName;
+
+        private Long point;
 
     }
 
