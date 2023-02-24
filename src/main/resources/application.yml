@@ -25,7 +25,7 @@ server:
   port: 8443
   ssl:
     key-store: /etc/letsencrypt/live/ourth.duckdns.org/keystore.p12
-    key-store-password: 
+    key-store-password: 1212
     key-store-type: pkcs12
     key-alias: tomcat
     enabled: true
