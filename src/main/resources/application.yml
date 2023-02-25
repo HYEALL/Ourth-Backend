@@ -21,3 +21,11 @@ spring:
 jwt:
   secret: Z2RzYy1za2h1LWphdmEtYmFja2VuZC1qd3Qtc3R1ZHktZGVjZW1iZXItMjh0aC1oYW5naWxsZWU=
   token-validity-in-milliseconds: 86400000
+server:
+  port: 8443
+  ssl:
+    key-store: /etc/letsencrypt/live/ourth.duckdns.org/keystore.p12
+    key-store-password: 1212
+    key-store-type: pkcs12
+    key-alias: tomcat
+    enabled: true
