@@ -37,7 +37,7 @@ public class SecurityConfig {
                 // "/main"으로 시작하는 uri 요청은 별도의 인증 절차 없이 허용
                 .requestMatchers("/main", "/login", "/join", "/").permitAll()
                 // "/member"로 시작하는 uri 요청은 인증 완료 후 [USER] 권한을 가진 사용자만 접근 허용
-                .requestMatchers("/user", "/usermission/all",  "usermission", "/rank/**").hasRole("USER")
+                .requestMatchers("/user", "usermission/add", "/rank/**").hasRole("USER")
                 .requestMatchers("/mission", "/usermission", "/usermission/all").hasRole("ADMIN")
                 // 이외에 모든 uri 요청은 인증을 완료해야 접근 허용
                 .anyRequest().authenticated()

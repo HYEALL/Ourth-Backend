@@ -21,7 +21,7 @@ public class UserMissionController {
     }
 
     // 해당 유저에게 랜덤 미션 추가 - 유저
-    @PostMapping("/usermission")
+    @PostMapping("/usermission/add")
     public ResponseEntity<String> addUserMissionToUser(Principal principal) {
         userMissionService.addUserMissionToUser(principal);
         return ResponseEntity.ok(principal.getName() + " 유저에게 주간 미션 추가 완료");
