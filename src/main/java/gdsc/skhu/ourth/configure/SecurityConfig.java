@@ -5,6 +5,7 @@ import gdsc.skhu.ourth.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -35,6 +36,7 @@ public class SecurityConfig {
                 // 시큐리티 처리에 HttpServletRequest를 이용함
                 .authorizeHttpRequests()
                 // "/main"으로 시작하는 uri 요청은 별도의 인증 절차 없이 허용
+                .requestMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
                 .requestMatchers("/main", "/login", "/join", "/").permitAll()
                 // "/member"로 시작하는 uri 요청은 인증 완료 후 [USER] 권한을 가진 사용자만 접근 허용
                 .requestMatchers("/user", "/usermission/add", "/rank/**").hasRole("USER")
