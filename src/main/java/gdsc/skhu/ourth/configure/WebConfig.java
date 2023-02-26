@@ -1,6 +1,7 @@
 package gdsc.skhu.ourth.configure;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -13,7 +14,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:3000", "*")
                 .allowedOriginPatterns("*")
-                .allowedHeaders("Authorization", "*", "Access-Control-Allow-Headers", "Content-Type")
-                .allowedMethods(ALLOWED_METHOD_NAMES.split(","));
+                .allowedHeaders("Authorization", "*", "Access-Control-Allow-Headers", "Content-Type", "Access-Control-Allow-Origin")
+                .allowCredentials(true)
+                .allowedMethods(ALLOWED_METHOD_NAMES.split(","))
+                .exposedHeaders(HttpHeaders.LOCATION);
     }
 }
