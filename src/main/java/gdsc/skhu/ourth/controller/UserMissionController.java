@@ -10,6 +10,7 @@ import java.security.Principal;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserMissionController {
 
     private final UserMissionService userMissionService;
