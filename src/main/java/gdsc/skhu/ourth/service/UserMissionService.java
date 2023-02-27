@@ -10,6 +10,7 @@ import gdsc.skhu.ourth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +41,7 @@ public class UserMissionService {
             Collections.shuffle(num);
             for (int j = 0; j < 4; j++) {
                 Mission mission = missionRepository.findById(num.get(j)).get();
-                UserMissionDTO dto = new UserMissionDTO();
+                UserMissionDTO.AddUserMission dto = new UserMissionDTO.AddUserMission();
                 dto.setUser(user);
                 dto.setMission(mission);
                 dto.setStatus(false);
@@ -50,6 +51,29 @@ public class UserMissionService {
 
     }
 
+    // 해당 유저에게 미션 추가
+    public void addUserMissionToUser(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).get();
+        List<Mission> missions = missionRepository.findAll();
+
+        // 1부터 미션 총 개수만큼 수를 리스트 num에 넣고 shuffle <- 랜덤
+        ArrayList<Long> num = new ArrayList<>();
+        for(int i = 1; i <= missions.size(); i++) {
+            num.add((long) i);
+        }
+        Collections.shuffle(num);
+
+        // 해당 유저에게 미션 4개 추가
+        for(int i = 0; i < 4; i++) {
+            Mission mission = missionRepository.findById(num.get(i)).get();
+            UserMissionDTO.AddUserMission dto = new UserMissionDTO.AddUserMission();
+            dto.setUser(user);
+            dto.setMission(mission);
+            dto.setStatus(false);
+            userMissionRepository.save(dto.toEntity());
+        }
+
+    }
 
     public void deleteAllUserMission() {
         userMissionRepository.deleteAll();
@@ -58,7 +82,7 @@ public class UserMissionService {
     public void successUserMission(UserMissionDTO dto) throws Exception {
         UserMission userMission = userMissionRepository.findById(dto.getId()).get();
         if(!userMission.getStatus()) {
-            userMission.setCleared(true);
+            userMission.setStatus(true);
         }
         else {
             throw new Exception("이미 완료한 미션입니다.");

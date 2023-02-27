@@ -32,7 +32,7 @@ public class UserMission extends BaseTime {
     @Column(columnDefinition = "boolean default false")
     private Boolean status; // 미션 완료 여부
 
-    public void setCleared(Boolean status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 
@@ -42,6 +42,7 @@ public class UserMission extends BaseTime {
                 .user(user)
                 .mission(mission)
                 .status(status)
+                .createDate(getCreateDate())
                 .text(mission.toDTO().getText())
                 .point(mission.toDTO().getPoint())
                 .build();
