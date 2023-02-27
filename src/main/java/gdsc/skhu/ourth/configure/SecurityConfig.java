@@ -36,7 +36,7 @@ public class SecurityConfig {
                 // 시큐리티 처리에 HttpServletRequest를 이용함
                 .authorizeHttpRequests()
                 // OPTIONS 요청은 허용, 프리플라이트
-                .requestMatchers(HttpMethod.OPTIONS, "/**/*").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "*").permitAll()
                 .requestMatchers("/main", "/login", "/join", "/").permitAll()
                 // "/member"로 시작하는 uri 요청은 인증 완료 후 [USER] 권한을 가진 사용자만 접근 허용
                 .requestMatchers("/user", "/usermission/add", "/rank/**").hasRole("USER")
