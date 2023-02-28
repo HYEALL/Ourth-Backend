@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+// 오늘을 기준으로 이번 주의 월요일과 일요일을 알아내기 위함
+import static gdsc.skhu.ourth.service.UserService.getCurMonday;
+import static gdsc.skhu.ourth.service.UserService.getCurSunday;
+
 @Service
 @RequiredArgsConstructor
 public class UserMissionService {
@@ -52,9 +56,16 @@ public class UserMissionService {
     }
 
     // 해당 유저에게 미션 추가
-    public void addUserMissionToUser(Principal principal) {
+    public void addUserMissionToUser(Principal principal) throws Exception {
         User user = userRepository.findByEmail(principal.getName()).get();
         List<Mission> missions = missionRepository.findAll();
+
+        // 이미 이번 주에 부여된 미션이 있으면 추가 불가능
+        if(userMissionRepository
+                .findUserMissionByCreateDateBetweenAndUser(getCurMonday(), getCurSunday(), user)
+                .size() != 0) {
+            throw new Exception("이미 이번 주 미션이 존재합니다.");
+        };
 
         // 1부터 미션 총 개수만큼 수를 리스트 num에 넣고 shuffle <- 랜덤
         ArrayList<Long> num = new ArrayList<>();

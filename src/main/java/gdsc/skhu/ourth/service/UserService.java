@@ -2,9 +2,11 @@ package gdsc.skhu.ourth.service;
 
 import gdsc.skhu.ourth.domain.School;
 import gdsc.skhu.ourth.domain.User;
+import gdsc.skhu.ourth.domain.UserMission;
 import gdsc.skhu.ourth.domain.dto.*;
 import gdsc.skhu.ourth.jwt.TokenProvider;
 import gdsc.skhu.ourth.repository.SchoolRepository;
+import gdsc.skhu.ourth.repository.UserMissionRepository;
 import gdsc.skhu.ourth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +32,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
+    private final UserMissionRepository userMissionRepository;
 
     // 로그인
     public TokenDTO login(UserDTO.Login dto) {
@@ -81,9 +86,41 @@ public class UserService {
 
     // 유저의 정보를 보여줌
     public UserInfoDTO userInfo(Principal principal) {
-        UserInfoDTO dto = userRepository.findByEmail(principal.getName()).get().toInfoDTO();
+        User user = userRepository.findByEmail(principal.getName()).get();
+        UserInfoDTO dto = user.toInfoDTO();
+
+        // 이번 주 월요일부터 일요일까지의 유저미션을 가져옴
+        List<UserMission> userMissions = userMissionRepository
+                .findUserMissionByCreateDateBetweenAndUser(getCurMonday(), getCurSunday(), user);
+
+        // UserInfoDTO에 주간 미션들 추가
+        dto.setUserMissions(userMissions.stream()
+                .map(UserMission::toDTO).collect(Collectors.toList()));
+
+        // UserInfoDTO에 학교 이름 추가
         dto.setSchoolName(dto.getSchool().getSchoolName());
+
         return dto;
     }
 
+    // 오늘 기준으로 이번 주 월요일
+    public static LocalDateTime getCurMonday(){
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY);
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH) + 1; // month 0부터 시작
+        int date = c.get(Calendar.DATE);
+        return LocalDateTime.of(year, month, date, 0, 0,0);
+    }
+
+    // 오늘 기준으로 이번 주 일요일
+    public static LocalDateTime getCurSunday(){
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
+        c.add(c.DATE,7);
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH) + 1;  // month 0부터 시작
+        int date = c.get(Calendar.DATE);
+        return LocalDateTime.of(year, month, date, 23, 59,59);
+    }
 }
