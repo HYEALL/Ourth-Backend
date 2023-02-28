@@ -10,7 +10,6 @@ import java.security.Principal;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class UserMissionController {
 
     private final UserMissionService userMissionService;
@@ -23,7 +22,7 @@ public class UserMissionController {
 
     // 해당 유저에게 랜덤 미션 추가 - 유저
     @PostMapping("/usermission/add")
-    public ResponseEntity<String> addUserMissionToUser(Principal principal) {
+    public ResponseEntity<String> addUserMissionToUser(Principal principal) throws Exception {
         userMissionService.addUserMissionToUser(principal);
         return ResponseEntity.ok(principal.getName() + " 유저에게 주간 미션 추가 완료");
     }
