@@ -45,11 +45,9 @@ public class SecurityConfig {
 
                 // 시큐리티 처리에 HttpServletRequest를 이용함
                 .authorizeHttpRequests()
-                // OPTIONS 요청은 허용, 프리플라이트
-                .requestMatchers(HttpMethod.OPTIONS, "**").permitAll()
                 .requestMatchers("/main", "/login", "/join", "/").permitAll()
                 // "/member"로 시작하는 uri 요청은 인증 완료 후 [USER] 권한을 가진 사용자만 접근 허용
-                .requestMatchers("/user", "/usermission/add", "usermission/clear", "/rank/**").hasRole("USER")
+                .requestMatchers("/user", "/usermission/add", "usermission/clear", "/rank/**", "/logout").hasRole("USER")
                 .requestMatchers("/mission", "/usermission", "/usermission/all").hasRole("ADMIN")
                 // 이외에 모든 uri 요청은 인증을 완료해야 접근 허용
                 .anyRequest().authenticated()
@@ -71,8 +69,8 @@ public class SecurityConfig {
     public CorsConfigurationSource configurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("https://ourth-frontend.vercel.app", "https://ourth.duckdns.org"));
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // configuration.setAllowedOrigins(List.of("https://ourth-frontend.vercel.app", "https://ourth.duckdns.org"));
+        configuration.setAllowedOriginPatterns(List.of("https://ourth-frontend.vercel.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Access-Control-Allow-Credentials", "Authorization", "Set-Cookie"));
