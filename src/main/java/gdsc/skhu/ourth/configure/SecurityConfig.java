@@ -27,7 +27,7 @@ public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
 
-    private final RedisTemplate redisTemplate;
+    // private final RedisTemplate redisTemplate;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -57,7 +57,7 @@ public class SecurityConfig {
                 .and()
 
                 // JwtFilter를 UsernamePasswordAuthenticationFilter 이전에 등록하는 설정
-                .addFilterBefore(new JwtFilter(tokenProvider, redisTemplate), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
