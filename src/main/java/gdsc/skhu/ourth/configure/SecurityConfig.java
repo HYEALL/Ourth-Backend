@@ -5,6 +5,7 @@ import gdsc.skhu.ourth.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,6 +26,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
+
+    private final RedisTemplate redisTemplate;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -54,7 +57,7 @@ public class SecurityConfig {
                 .and()
 
                 // JwtFilter를 UsernamePasswordAuthenticationFilter 이전에 등록하는 설정
-                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtFilter(tokenProvider, redisTemplate), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -68,7 +71,7 @@ public class SecurityConfig {
     public CorsConfigurationSource configurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000/"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000/", "https://ourth-frontend.vercel.app/"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Access-Control-Allow-Credentials", "Authorization", "Set-Cookie"));
