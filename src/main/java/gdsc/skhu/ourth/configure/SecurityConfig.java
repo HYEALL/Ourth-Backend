@@ -5,8 +5,6 @@ import gdsc.skhu.ourth.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,8 +24,6 @@ import java.util.List;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
-
-    // private final RedisTemplate redisTemplate;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -69,8 +65,7 @@ public class SecurityConfig {
     public CorsConfigurationSource configurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // configuration.setAllowedOrigins(List.of("https://ourth-frontend.vercel.app", "https://ourth.duckdns.org"));
-        configuration.setAllowedOriginPatterns(List.of("https://ourth-frontend.vercel.app"));
+        configuration.setAllowedOriginPatterns(List.of("https://ourth-frontend.vercel.app, https://ourth.duckdns.org"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Access-Control-Allow-Credentials", "Authorization", "Set-Cookie"));
