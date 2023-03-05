@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// 오늘을 기준으로 이번 주의 월요일과 일요일을 알아내기 위함
-import static gdsc.skhu.ourth.service.UserService.getCurMonday;
-import static gdsc.skhu.ourth.service.UserService.getCurSunday;
+// 오늘을 기준으로 이번 주의 시작과 끝을 알아내기 위함
+import static gdsc.skhu.ourth.service.UserService.*;
+
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +62,7 @@ public class UserMissionService {
 
         // 이미 이번 주에 부여된 미션이 있으면 추가 불가능
         if(userMissionRepository
-                .findUserMissionByCreateDateBetweenAndUser(getCurMonday(), getCurSunday(), user)
+                .findUserMissionByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user)
                 .size() != 0) {
             throw new Exception("이미 이번 주 미션이 존재합니다.");
         };

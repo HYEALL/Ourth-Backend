@@ -89,9 +89,12 @@ public class UserService {
         User user = userRepository.findByEmail(principal.getName()).get();
         UserInfoDTO dto = user.toInfoDTO();
 
+        System.out.println(getCurSunday());
+        System.out.println(getCurSaturday());
+
         // 이번 주 월요일부터 일요일까지의 유저미션을 가져옴
         List<UserMission> userMissions = userMissionRepository
-                .findUserMissionByCreateDateBetweenAndUser(getCurMonday(), getCurSunday(), user);
+                .findUserMissionByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user);
 
         // UserInfoDTO에 주간 미션들 추가
         dto.setUserMissions(userMissions.stream()
@@ -103,21 +106,20 @@ public class UserService {
         return dto;
     }
 
-    // 오늘 기준으로 이번 주 월요일
-    public static LocalDateTime getCurMonday(){
+    // 오늘 기준으로 이번 주 일요일 - 시작
+    public static LocalDateTime getCurSunday(){
         Calendar c = Calendar.getInstance();
-        c.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY);
+        c.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH) + 1; // month 0부터 시작
         int date = c.get(Calendar.DATE);
         return LocalDateTime.of(year, month, date, 0, 0,0);
     }
 
-    // 오늘 기준으로 이번 주 일요일
-    public static LocalDateTime getCurSunday(){
+    // 오늘 기준으로 이번 주 토요일
+    public static LocalDateTime getCurSaturday(){
         Calendar c = Calendar.getInstance();
-        c.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
-        c.add(c.DATE,7);
+        c.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY);
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH) + 1;  // month 0부터 시작
         int date = c.get(Calendar.DATE);
