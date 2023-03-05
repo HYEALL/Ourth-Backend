@@ -1,6 +1,5 @@
 package gdsc.skhu.ourth.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import gdsc.skhu.ourth.domain.Mission;
 import gdsc.skhu.ourth.domain.User;
 import gdsc.skhu.ourth.domain.UserMission;
@@ -8,33 +7,14 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
-@Builder
-@RequiredArgsConstructor
-@AllArgsConstructor
 public class UserMissionDTO {
 
-    @JsonIgnore
-    private User user;
-
-    @JsonIgnore
-    private Mission mission;
-
-    private LocalDateTime createDate;
-
-    private long id;
-
-    private String text;
-
-    private Long point;
-
-    private Boolean status;
-
+    // 주간 미션 추가 요청 DTO
     @Data
     @Builder
     @RequiredArgsConstructor
     @AllArgsConstructor
-    public static class AddUserMission { // 유저에게 미션 추가할 때 사용하는 dto
+    public static class RequestAddUserMission {
 
         private User user;
 
@@ -50,4 +30,35 @@ public class UserMissionDTO {
                     .build();
         }
     }
+
+    // 주간 미션 완료 요청 DTO
+    @Data
+    @Builder
+    @RequiredArgsConstructor
+    @AllArgsConstructor
+    public static class RequestSuccess {
+
+        private Long id;
+
+    }
+
+    // 주간 미션 응답 DTO
+    @Data
+    @Builder
+    @RequiredArgsConstructor
+    @AllArgsConstructor
+    public static class Response {
+
+        private Long id;
+
+        private LocalDateTime createDate;
+
+        private String text;
+
+        private Long point;
+
+        private Boolean status;
+
+    }
+
 }

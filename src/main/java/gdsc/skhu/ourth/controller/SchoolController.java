@@ -16,7 +16,7 @@ public class SchoolController {
 
     // 학교 순위 조회
     @GetMapping("/rank/school")
-    public List<SchoolDTO.School> schoolRank() {
+    public List<SchoolDTO.Response> schoolRank() {
         return schoolService.schoolRank();
     }
 

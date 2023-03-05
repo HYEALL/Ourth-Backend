@@ -16,7 +16,7 @@ public class MissionController {
 
     // 미션 리스트 확인하기 - 관리자
     @GetMapping("/mission")
-    public List<MissionDTO> missionList() {
+    public List<MissionDTO.Response> missionList() {
         return missionService.missionList();
     }
 

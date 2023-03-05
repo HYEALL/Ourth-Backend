@@ -22,13 +22,13 @@ public class UserController {
 
     // 로그인 - 누구나
     @PostMapping("/login")
-    public TokenDTO login(@RequestBody UserDTO.Login dto) {
+    public TokenDTO login(@RequestBody UserDTO.RequestLogin dto) {
         return userService.login(dto);
     }
 
     // 회원가입 - 누구나
     @PostMapping("/join")
-    public ResponseEntity<String> join(@Valid @RequestBody UserDTO.SignUp dto) throws Exception {
+    public ResponseEntity<String> join(@Valid @RequestBody UserDTO.RequestSignUp dto) throws Exception {
         return ResponseEntity.ok(userService.signUp(dto).toString() + " 회원가입 완료");
     }
 

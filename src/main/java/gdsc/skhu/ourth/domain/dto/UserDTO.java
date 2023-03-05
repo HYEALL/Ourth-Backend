@@ -19,7 +19,7 @@ public class UserDTO {
     @Getter
     @Builder
     @AllArgsConstructor
-    public static class SignUp {
+    public static class RequestSignUp {
         @NotBlank(message = "이메일을 입력해주세요")
         private String email;
 
@@ -63,27 +63,11 @@ public class UserDTO {
 
     // 로그인 요청 DTO
     @Data
-    public static class Login {
+    public static class RequestLogin {
 
         private String email;
 
         private String password;
-
-    }
-
-    @Data
-    @Builder
-    public static class Rank {
-
-        private Long id;
-
-        private String username;
-
-        private School school;
-
-        private String schoolName;
-
-        private Long point;
 
     }
 

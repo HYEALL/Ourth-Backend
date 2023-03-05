@@ -26,6 +26,22 @@ public class UserInfoDTO {
 
     private Long point;
 
-    private List<UserMissionDTO> userMissions;
+    private List<UserMissionDTO.Response> userMissions;
 
+    @Data
+    @Builder
+    public static class Badge {
+
+        private Long id;
+
+        private String email;
+
+        private String username;
+
+        private String schoolName;
+
+        private Long point;
+
+        private List<BadgeDTO> badges;
+    }
 }

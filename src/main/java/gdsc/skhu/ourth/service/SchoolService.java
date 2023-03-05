@@ -19,13 +19,13 @@ public class SchoolService {
     private final SchoolRepository schoolRepository;
 
     // 학교 순위 조회
-    public List<SchoolDTO.School> schoolRank() {
+    public List<SchoolDTO.Response> schoolRank() {
         List<School> schoolList = schoolRepository.findAll();
-        List<SchoolDTO.School> dtoList = new ArrayList<>();
+        List<SchoolDTO.Response> dtoList = new ArrayList<>();
 
         // 모든 학교의 토탈 포인트를 계산
         for(School school : schoolList) {
-            SchoolDTO.School dto = school.toSchoolDTO();
+            SchoolDTO.Response dto = school.toResponseDTO();
 
             // 해당 학교의 소속된 유저의 포인트를 모두 합산
             Long totalPoint = 0L;
@@ -42,9 +42,9 @@ public class SchoolService {
         }
 
         // 토탈 포인트를 기준으로 내림차순 정렬
-        dtoList.sort(new Comparator<SchoolDTO.School>() {
+        dtoList.sort(new Comparator<SchoolDTO.Response>() {
             @Override
-            public int compare(SchoolDTO.School o1, SchoolDTO.School o2) {
+            public int compare(SchoolDTO.Response o1, SchoolDTO.Response o2) {
                 return (int)(o2.getPoint() - o1.getPoint());
             }
         });
@@ -53,7 +53,7 @@ public class SchoolService {
         Long temp = dtoList.get(0).getPoint(); // 이전 DTO의 점수 임시 저장 변수
         Long ranking = 1L; // 순위 정보
         long sameCount = -1L; // 현재 동점 학교 개수
-        for(SchoolDTO.School dto : dtoList) {
+        for(SchoolDTO.Response dto : dtoList) {
             if(Objects.equals(temp, dto.getPoint())) {
                 dto.setRanking(ranking);
                 sameCount++;
