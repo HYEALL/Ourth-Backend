@@ -35,7 +35,7 @@ public class UserService {
     private final UserMissionRepository userMissionRepository;
 
     // 로그인
-    public TokenDTO login(UserDTO.Login dto) {
+    public TokenDTO login(UserDTO.RequestLogin dto) {
         String email = dto.getEmail();
         String password = dto.getPassword();
 
@@ -62,7 +62,7 @@ public class UserService {
 
     // 회원가입
     @Transactional
-    public Long signUp(UserDTO.SignUp dto) throws Exception {
+    public Long signUp(UserDTO.RequestSignUp dto) throws Exception {
 
         if(userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new Exception("이미 존재하는 이메일입니다.");
@@ -89,16 +89,13 @@ public class UserService {
         User user = userRepository.findByEmail(principal.getName()).get();
         UserInfoDTO dto = user.toInfoDTO();
 
-        System.out.println(getCurSunday());
-        System.out.println(getCurSaturday());
-
         // 이번 주 월요일부터 일요일까지의 유저미션을 가져옴
         List<UserMission> userMissions = userMissionRepository
                 .findUserMissionByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user);
 
         // UserInfoDTO에 주간 미션들 추가
         dto.setUserMissions(userMissions.stream()
-                .map(UserMission::toDTO).collect(Collectors.toList()));
+                .map(UserMission::toResponseDTO).collect(Collectors.toList()));
 
         // UserInfoDTO에 학교 이름 추가
         dto.setSchoolName(dto.getSchool().getSchoolName());
@@ -116,7 +113,7 @@ public class UserService {
         return LocalDateTime.of(year, month, date, 0, 0,0);
     }
 
-    // 오늘 기준으로 이번 주 토요일
+    // 오늘 기준으로 이번 주 토요일 - 끝
     public static LocalDateTime getCurSaturday(){
         Calendar c = Calendar.getInstance();
         c.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY);

@@ -36,15 +36,14 @@ public class UserMission extends BaseTime {
         this.status = status;
     }
 
-    public UserMissionDTO toDTO() {
-        return UserMissionDTO.builder()
+    public UserMissionDTO.Response toResponseDTO() {
+        return UserMissionDTO.Response.builder()
                 .id(id)
-                .user(user)
-                .mission(mission)
+                .text(mission.toResponseDTO().getText())
+                .point(mission.toResponseDTO().getPoint())
                 .status(status)
                 .createDate(getCreateDate())
-                .text(mission.toDTO().getText())
-                .point(mission.toDTO().getPoint())
                 .build();
     }
+
 }

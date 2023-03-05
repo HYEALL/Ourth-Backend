@@ -36,7 +36,7 @@ public class UserMissionController {
 
     // 유저가 미션을 완료했을 때 완료로 바꾸고 포인트 획득, user_mission_id만 주면 됨 - 유저
     @PatchMapping("/usermission/clear")
-    public ResponseEntity<String> successUserMission(@RequestBody UserMissionDTO dto) throws Exception {
+    public ResponseEntity<String> successUserMission(@RequestBody UserMissionDTO.RequestSuccess dto) throws Exception {
         userMissionService.successUserMission(dto);
         return ResponseEntity.ok("해당 미션 성공");
     }

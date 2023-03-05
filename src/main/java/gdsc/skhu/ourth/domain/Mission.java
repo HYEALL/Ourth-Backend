@@ -22,8 +22,8 @@ public class Mission {
     @OneToMany(mappedBy = "mission")
     private List<UserMission> userMissions; // 어느 유저에게 주어졌는지
 
-    public MissionDTO toDTO() {
-        return MissionDTO.builder()
+    public MissionDTO.Response toResponseDTO() {
+        return MissionDTO.Response.builder()
                 .id(id)
                 .text(text)
                 .point(point)

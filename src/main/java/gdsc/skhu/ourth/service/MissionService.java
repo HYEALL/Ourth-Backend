@@ -15,10 +15,10 @@ public class MissionService {
 
     private final MissionRepository missionRepository;
 
-    // 미션 리스트
-    public List<MissionDTO> missionList() {
+    // 미션 목록
+    public List<MissionDTO.Response> missionList() {
         return missionRepository.findAll().stream()
-                .map(Mission::toDTO)
+                .map(Mission::toResponseDTO)
                 .collect(Collectors.toList());
     }
 

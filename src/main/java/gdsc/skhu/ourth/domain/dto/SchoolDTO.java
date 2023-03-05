@@ -5,12 +5,12 @@ import lombok.Data;
 
 public class SchoolDTO {
 
-    // 학교 순위 보여줄 때 사용
+    // 학교 정보 응답 DTO
     @Data
     @Builder
-    public static class School {
+    public static class Response {
 
-        private Long id; // 해당 학교의 고유 id
+        private Long id;
 
         private String schoolName; // 해당 학교의 이름
 

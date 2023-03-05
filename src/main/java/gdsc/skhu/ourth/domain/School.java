@@ -22,8 +22,8 @@ public class School {
     @OneToMany(mappedBy = "school")
     private List<User> users = new ArrayList<>();
 
-    public SchoolDTO.School toSchoolDTO() {
-        return SchoolDTO.School.builder()
+    public SchoolDTO.Response toResponseDTO() {
+        return SchoolDTO.Response.builder()
                 .id(id)
                 .schoolName(schoolName)
                 .build();
