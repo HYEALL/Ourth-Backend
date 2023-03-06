@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -16,8 +17,8 @@ public class SchoolController {
 
     // 학교 순위 조회
     @GetMapping("/rank/school")
-    public List<SchoolDTO.Response> schoolRank() {
-        return schoolService.schoolRank();
+    public List<SchoolDTO.Response> schoolRank(Principal principal) {
+        return schoolService.schoolRank(principal);
     }
 
 }

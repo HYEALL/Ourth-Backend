@@ -5,6 +5,7 @@ import gdsc.skhu.ourth.domain.User;
 import gdsc.skhu.ourth.domain.UserMission;
 import gdsc.skhu.ourth.domain.dto.*;
 import gdsc.skhu.ourth.jwt.TokenProvider;
+import gdsc.skhu.ourth.repository.BadgeRepository;
 import gdsc.skhu.ourth.repository.SchoolRepository;
 import gdsc.skhu.ourth.repository.UserMissionRepository;
 import gdsc.skhu.ourth.repository.UserRepository;
@@ -17,10 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static gdsc.skhu.ourth.util.DateUtil.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,6 +34,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
     private final UserMissionRepository userMissionRepository;
+    private final BadgeRepository badgeRepository;
 
     // 로그인
     public TokenDTO login(UserDTO.RequestLogin dto) {
@@ -100,26 +102,11 @@ public class UserService {
         // UserInfoDTO에 학교 이름 추가
         dto.setSchoolName(dto.getSchool().getSchoolName());
 
+        // UserInfoDTO에 이번 주 뱃지 유무
+        dto.setCurrentBadge(!(badgeRepository
+                .findByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user).isEmpty()));
+
         return dto;
     }
 
-    // 오늘 기준으로 이번 주 일요일 - 시작
-    public static LocalDateTime getCurSunday(){
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH) + 1; // month 0부터 시작
-        int date = c.get(Calendar.DATE);
-        return LocalDateTime.of(year, month, date, 0, 0,0);
-    }
-
-    // 오늘 기준으로 이번 주 토요일 - 끝
-    public static LocalDateTime getCurSaturday(){
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY);
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH) + 1;  // month 0부터 시작
-        int date = c.get(Calendar.DATE);
-        return LocalDateTime.of(year, month, date, 23, 59,59);
-    }
 }

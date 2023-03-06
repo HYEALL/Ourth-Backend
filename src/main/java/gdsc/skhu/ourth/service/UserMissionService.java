@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 // 오늘을 기준으로 이번 주의 시작과 끝을 알아내기 위함
-import static gdsc.skhu.ourth.service.UserService.*;
+import static gdsc.skhu.ourth.util.DateUtil.*;
 
 
 @Service

@@ -15,33 +15,19 @@ public class UserInfoDTO {
 
     private Long id;
 
-    private String email;
+    private String email; // 유저 이메일
 
-    private String username;
+    private String username; // 유저 이름
 
     @JsonIgnore
-    private School school;
+    private School school; // 유저의 소속 학교
 
-    private String schoolName;
+    private String schoolName; // 유저의 소속 학교 이름
 
-    private Long point;
+    private Long point; // 유저의 기여 포인트
 
-    private List<UserMissionDTO.Response> userMissions;
+    private Boolean currentBadge; // 최근(이번 주) 획득한 뱃지 유무
 
-    @Data
-    @Builder
-    public static class Badge {
+    private List<UserMissionDTO.Response> userMissions; // 유저의 주간 미션 목록
 
-        private Long id;
-
-        private String email;
-
-        private String username;
-
-        private String schoolName;
-
-        private Long point;
-
-        private List<BadgeDTO> badges;
-    }
 }
