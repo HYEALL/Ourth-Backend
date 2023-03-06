@@ -44,6 +44,9 @@ public class User extends BaseTime implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<UserMission> userMissions = new ArrayList<>(); // 유저 주간 미션 목록
 
+    @OneToMany(mappedBy = "user")
+    private List<Badge> badges = new ArrayList<>(); // 뱃지 목록
+
     // 권한 목록, @ElementCollection: 해당 필드가 컬렉션 객체임을 JPA에게 알려줌
     @ElementCollection(fetch = FetchType.EAGER) // 연관된 엔티티 즉시 로딩
     @Builder.Default

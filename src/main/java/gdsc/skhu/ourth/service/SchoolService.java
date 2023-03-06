@@ -4,9 +4,11 @@ import gdsc.skhu.ourth.domain.School;
 import gdsc.skhu.ourth.domain.User;
 import gdsc.skhu.ourth.domain.dto.SchoolDTO;
 import gdsc.skhu.ourth.repository.SchoolRepository;
+import gdsc.skhu.ourth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -17,9 +19,10 @@ import java.util.Objects;
 public class SchoolService {
 
     private final SchoolRepository schoolRepository;
+    private final UserRepository userRepository;
 
     // 학교 순위 조회
-    public List<SchoolDTO.Response> schoolRank() {
+    public List<SchoolDTO.Response> schoolRank(Principal principal) {
         List<School> schoolList = schoolRepository.findAll();
         List<SchoolDTO.Response> dtoList = new ArrayList<>();
 
@@ -66,6 +69,19 @@ public class SchoolService {
             }
         }
 
+        // 내 학교 순위 정보를 리스트의 맨 마지막에 삽입
+        User user = userRepository.findByEmail(principal.getName()).get();
+        SchoolDTO.Response mySchoolDTO = null;
+        for(SchoolDTO.Response dto : dtoList) {
+            // dtoList에서 자신의 학교 dto를 알아내기
+            if(dto.getSchoolName().equals(user.getSchool().getSchoolName())) {
+                mySchoolDTO = dto;
+            }
+        }
+        // dto 리스트 맨 마지막에 자신의 학교 dto 추가
+        dtoList.add(mySchoolDTO);
+
+        // 반환
         return dtoList;
     }
 

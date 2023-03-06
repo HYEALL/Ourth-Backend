@@ -5,6 +5,7 @@ import gdsc.skhu.ourth.domain.User;
 import gdsc.skhu.ourth.domain.UserMission;
 import gdsc.skhu.ourth.domain.dto.*;
 import gdsc.skhu.ourth.jwt.TokenProvider;
+import gdsc.skhu.ourth.repository.BadgeRepository;
 import gdsc.skhu.ourth.repository.SchoolRepository;
 import gdsc.skhu.ourth.repository.UserMissionRepository;
 import gdsc.skhu.ourth.repository.UserRepository;
@@ -33,6 +34,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
     private final UserMissionRepository userMissionRepository;
+    private final BadgeRepository badgeRepository;
 
     // 로그인
     public TokenDTO login(UserDTO.RequestLogin dto) {
@@ -99,6 +101,10 @@ public class UserService {
 
         // UserInfoDTO에 학교 이름 추가
         dto.setSchoolName(dto.getSchool().getSchoolName());
+
+        // UserInfoDTO에 이번 주 뱃지 유무
+        dto.setCurrentBadge(!(badgeRepository
+                .findByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user).isEmpty()));
 
         return dto;
     }
