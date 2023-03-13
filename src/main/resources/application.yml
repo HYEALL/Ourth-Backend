@@ -25,8 +25,8 @@ spring:
       port: 6379
 jwt:
   secret: Z2RzYy1za2h1LWphdmEtYmFja2VuZC1qd3Qtc3R1ZHktZGVjZW1iZXItMjh0aC1oYW5naWxsZWU=
-  access-token-validity-in-milliseconds: 30000 #1800000
-  refresh-token-validity-in-milliseconds: 60000 #1209600000
+  access-token-validity-in-milliseconds: 60000 #1800000
+  refresh-token-validity-in-milliseconds: 1209600000
 server:
   port: 8443
   ssl:
