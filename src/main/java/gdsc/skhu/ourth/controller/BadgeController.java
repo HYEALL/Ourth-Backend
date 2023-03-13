@@ -26,8 +26,12 @@ public class BadgeController {
 
     // 뱃지 추가하기 - 유저
     @PostMapping("/badge/add")
-    public ResponseEntity<String> addBadge(@RequestBody BadgeDTO.RequestAddBadge dto, Principal principal) throws Exception {
-        badgeService.addBadge(dto, principal);
+    public ResponseEntity<String> addBadge(Principal principal) throws IllegalStateException {
+        try {
+            badgeService.addBadge(principal);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok("뱃지 추가 완료");
     }
 

@@ -56,7 +56,7 @@ public class UserMissionService {
     }
 
     // 해당 유저에게 주간 미션 추가
-    public void addUserMissionToUser(Principal principal) throws Exception {
+    public void addUserMissionToUser(Principal principal) throws IllegalStateException {
         User user = userRepository.findByEmail(principal.getName()).get();
         List<Mission> missions = missionRepository.findAll();
 
@@ -64,7 +64,7 @@ public class UserMissionService {
         if(userMissionRepository
                 .findUserMissionByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user)
                 .size() != 0) {
-            throw new Exception("이미 이번 주 미션이 존재합니다.");
+            throw new IllegalStateException("이미 이번 주 미션이 존재합니다.");
         };
 
         // 1부터 미션 총 개수만큼 수를 리스트 num에 넣고 shuffle <- 랜덤
@@ -87,14 +87,14 @@ public class UserMissionService {
     }
 
     // 해당 유저의 해당 미션 성공
-    public void successUserMission(UserMissionDTO.RequestSuccess dto) throws Exception {
+    public void successUserMission(UserMissionDTO.RequestSuccess dto) throws IllegalStateException {
         // 해당 주간 미션 완료
         UserMission userMission = userMissionRepository.findById(dto.getId()).get();
         if(!userMission.getStatus()) {
             userMission.setStatus(true);
         }
         else {
-            throw new Exception("이미 완료한 미션입니다.");
+            throw new IllegalStateException("이미 완료한 미션입니다.");
         }
 
         // 완료한 미션의 포인트만큼 유저의 포인트 증가
