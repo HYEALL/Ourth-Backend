@@ -5,6 +5,7 @@ import gdsc.skhu.ourth.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,6 +25,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
+    private final RedisTemplate redisTemplate;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -36,14 +38,17 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                 .and()
+
                 .cors().configurationSource(configurationSource())
+
                 .and()
 
+                .logout().disable()
                 // 시큐리티 처리에 HttpServletRequest를 이용함
                 .authorizeHttpRequests()
-                .requestMatchers("/main", "/login", "/join", "/").permitAll()
+                .requestMatchers("/main", "/login", "/join", "/", "/logout", "/refresh").permitAll()
                 // 인증 완료 후 [USER] 또는 [ADMIN] 권한을 가진 사용자만 접근 허용
-                .requestMatchers("/user", "/usermission/add", "usermission/clear", "/rank/**", "/logout", "/badge/**").hasRole("USER")
+                .requestMatchers("/user", "/usermission/add", "usermission/clear", "/rank/**", "/badge/**").hasRole("USER")
                 .requestMatchers("/mission", "/usermission", "/usermission/all").hasRole("ADMIN")
                 // 이외에 모든 uri 요청은 인증을 완료해야 접근 허용
                 .anyRequest().authenticated()
@@ -51,7 +56,7 @@ public class SecurityConfig {
                 .and()
 
                 // JwtFilter를 UsernamePasswordAuthenticationFilter 이전에 등록하는 설정
-                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtFilter(tokenProvider, redisTemplate), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

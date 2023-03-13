@@ -20,12 +20,9 @@ public class Badge extends BaseTime {
     @JoinColumn(name = "user_id")
     private User user; // N:1, 유저
 
-    private String type;
-
     public BadgeDTO.Response toResponseDTO() {
         return BadgeDTO.Response.builder()
                 .createTime(getCreateDate())
-                .type(type)
                 .build();
     }
 

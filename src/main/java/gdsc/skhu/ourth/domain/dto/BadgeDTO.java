@@ -16,12 +16,9 @@ public class BadgeDTO {
 
         private User user;
 
-        private String type;
-
         public Badge toEntity() {
             return Badge.builder()
                     .user(user)
-                    .type(type)
                     .build();
         }
 
@@ -33,8 +30,6 @@ public class BadgeDTO {
     public static class Response {
 
         private LocalDateTime createTime;
-
-        private String type;
 
     }
 }

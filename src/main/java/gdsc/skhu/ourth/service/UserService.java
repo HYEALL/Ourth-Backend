@@ -9,16 +9,20 @@ import gdsc.skhu.ourth.repository.BadgeRepository;
 import gdsc.skhu.ourth.repository.SchoolRepository;
 import gdsc.skhu.ourth.repository.UserMissionRepository;
 import gdsc.skhu.ourth.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static gdsc.skhu.ourth.util.DateUtil.*;
@@ -35,6 +39,7 @@ public class UserService {
     private final SchoolRepository schoolRepository;
     private final UserMissionRepository userMissionRepository;
     private final BadgeRepository badgeRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     // 로그인
     public TokenDTO login(UserDTO.RequestLogin dto) {
@@ -59,23 +64,77 @@ public class UserService {
 
         // 3. 인증된 정보를 기반으로 JWT 토큰 생성 후 반환
         TokenDTO tokenDTO = tokenProvider.createToken(authentication);
+
+        // 4. refreshToken을 redis에 저장 후 유효성 검증에 사용
+        Long expiration = tokenProvider.getExpiration(tokenDTO.getRefreshToken()); // refreshToken의 유효기간
+
+        redisTemplate.opsForValue()
+                .set(tokenDTO.getRefreshToken(), "refreshToken", expiration, TimeUnit.MILLISECONDS);
+
         return tokenDTO;
+    }
+
+    // 로그아웃
+    public void logout(HttpServletRequest request, TokenDTO dto) {
+        // AccessToken 값
+        String accessToken = tokenProvider.resolveToken(request);
+
+        // 유효기간
+        Long expiration = tokenProvider.getExpiration(accessToken);
+
+        // 블랙 리스트 추가
+        redisTemplate.opsForValue()
+                .set(accessToken, "logout", expiration, TimeUnit.MILLISECONDS);
+
+        // 기존 refreshToken 제거
+        redisTemplate.delete(dto.getRefreshToken());
+    }
+
+    // 리프레시
+    public TokenDTO refresh(HttpServletRequest request, TokenDTO dto) throws Exception {
+        String refreshToken = dto.getRefreshToken();
+
+        String isValidate = (String)redisTemplate.opsForValue().get(refreshToken);
+
+        // redis에 유효한 refreshToken이 존재할 경우
+        if(!ObjectUtils.isEmpty(isValidate)) {
+            return tokenProvider.createAccessTokenByRefreshToken(request, refreshToken);
+        }
+        else {
+            throw new Exception("refreshToken 없음");
+        }
     }
 
     // 회원가입
     @Transactional
-    public Long signUp(UserDTO.RequestSignUp dto) throws Exception {
+    public Long signUp(UserDTO.RequestSignUp dto) throws IllegalStateException {
+
+        if(dto.getEmail() == null || dto.getEmail().length() == 0) {
+            throw new IllegalStateException("이메일을 입력하지 않았습니다.");
+        }
 
         if(userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new Exception("이미 존재하는 이메일입니다.");
+            throw new IllegalStateException("이미 존재하는 이메일입니다.");
+        }
+
+        if(dto.getPassword() == null || dto.getPassword().length() == 0) {
+            throw new IllegalStateException("비밀번호를 입력하지 않았습니다.");
+        }
+
+        if(dto.getCheckedPassword() == null || dto.getCheckedPassword().length() == 0) {
+            throw new IllegalStateException("확인 비밀번호를 입력하지 않았습니다.");
         }
 
         if(!dto.getPassword().equals(dto.getCheckedPassword())) {
-            throw new Exception("비밀번호가 일치하지 않습니다.");
+            throw new IllegalStateException("비밀번호가 일치하지 않습니다.");
         }
 
-        if(dto.getSchoolName().isEmpty()) {
-            throw new Exception("거주 지역을 입력하지 않았습니다.");
+        if(dto.getSchoolName() == null || dto.getSchoolName().length() == 0) {
+            throw new IllegalStateException("학교명을 입력하지 않았습니다.");
+        }
+
+        if(dto.getUsername() == null || dto.getUsername().length() == 0) {
+            throw new IllegalStateException("유저 이름을 입력하지 않았습니다.");
         }
 
         School school = schoolRepository.findBySchoolName(dto.getSchoolName()).get();
