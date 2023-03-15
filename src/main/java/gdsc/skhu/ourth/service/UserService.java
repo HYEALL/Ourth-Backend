@@ -23,7 +23,6 @@ import org.springframework.util.ObjectUtils;
 import java.security.Principal;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static gdsc.skhu.ourth.util.DateUtil.*;
 
@@ -146,24 +145,28 @@ public class UserService {
     }
 
     // 유저의 정보를 보여줌
-    public UserInfoDTO userInfo(Principal principal) {
+    public UserInfoDTO.userInfo userInfo(Principal principal) {
         User user = userRepository.findByEmail(principal.getName()).get();
-        UserInfoDTO dto = user.toInfoDTO();
+        UserInfoDTO.userInfo dto = user.toInfoDTO();
 
         // 이번 주 월요일부터 일요일까지의 유저미션을 가져옴
         List<UserMission> userMissions = userMissionRepository
                 .findUserMissionByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user);
 
-        // UserInfoDTO에 주간 미션들 추가
-        dto.setUserMissions(userMissions.stream()
-                .map(UserMission::toResponseDTO).collect(Collectors.toList()));
+        // UserInfoDTO에 주간 미션 존재 여부 추가
+        dto.setMissionPresence(!userMissions.isEmpty());
+
+        // UserInfoDTO에 남은 주간 미션 개수 추가
+        int missionCount = 0;
+        for(UserMission userMission : userMissions) {
+            if(!userMission.getStatus()) {
+                missionCount++;
+            }
+        }
+        dto.setMissionCount(missionCount);
 
         // UserInfoDTO에 학교 이름 추가
         dto.setSchoolName(dto.getSchool().getSchoolName());
-
-        // UserInfoDTO에 이번 주 뱃지 유무
-        dto.setCurrentBadge(!(badgeRepository
-                .findByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user).isEmpty()));
 
         return dto;
     }

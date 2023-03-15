@@ -36,24 +36,27 @@ public class BadgeService {
 
     // 유저에게 뱃지 추가
     public void addBadge(Principal principal) throws IllegalStateException {
-        BadgeDTO.RequestAddBadge dto = null;
-
         // 현재 로그인 된 유저의 정보를 이용해 유저를 알아내고 dto에 추가함
         User user = userRepository.findByEmail(principal.getName()).get();
+        BadgeDTO.RequestAddBadge dto = new Badge().toRequestAddDTO();
         dto.setUser(user);
 
+        // 유저 미션
+        List<UserMission> userMissions = userMissionRepository
+                .findUserMissionByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user);
+
         // 주간 미션을 부여받지 않은 경우
-        if(userMissionRepository.findUserMissionByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user).isEmpty()) {
+        if(userMissions.isEmpty()) {
             throw new IllegalStateException("주간 미션이 없습니다.");
         }
 
         // 이번 주에 획득한 뱃지가 있을 경우 뱃지 획득 불가
-        if(!badgeRepository.findByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user).isEmpty()) {
+        if(badgeRepository.findByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user).isPresent()) {
             throw new IllegalStateException("이번 주에 이미 뱃지를 획득했습니다.");
         }
 
         // 완료되지 않은 주간 미션이 있을 경우 뱃지 획득 불가
-        for(UserMission userMission : userMissionRepository.findUserMissionByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user)) {
+        for(UserMission userMission : userMissions) {
             if(!userMission.getStatus()) {
                 throw new IllegalStateException("완료되지 않은 주간 미션이 존재합니다.");
             }

@@ -52,13 +52,19 @@ public class User extends BaseTime implements UserDetails {
     @Builder.Default
     private List<String> roles = new ArrayList<>();
 
-    public UserInfoDTO toInfoDTO() {
-        return UserInfoDTO.builder()
+    public UserInfoDTO.userInfo toInfoDTO() {
+        return UserInfoDTO.userInfo.builder()
                 .id(id)
                 .email(email)
                 .username(username)
                 .school(school)
                 .point(point)
+                .build();
+    }
+
+    // 미션용
+    public UserInfoDTO.missions toUserInfoMissionDTO() {
+        return UserInfoDTO.missions.builder()
                 .userMissions(userMissions.stream()
                         .map(UserMission::toResponseDTO)
                         .collect(Collectors.toList()))

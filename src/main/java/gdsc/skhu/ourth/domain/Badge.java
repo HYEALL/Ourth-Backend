@@ -26,4 +26,9 @@ public class Badge extends BaseTime {
                 .build();
     }
 
+    public BadgeDTO.RequestAddBadge toRequestAddDTO() {
+        return BadgeDTO.RequestAddBadge.builder()
+                .build();
+    }
+
 }

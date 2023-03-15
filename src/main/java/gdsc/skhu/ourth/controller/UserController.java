@@ -53,7 +53,7 @@ public class UserController {
 
     // 토큰 값으로 내 정보 확인 - 유저
     @GetMapping("/user")
-    public UserInfoDTO userInfo(Principal principal) {
+    public UserInfoDTO.userInfo userInfo(Principal principal) {
         return userService.userInfo(principal);
     }
 
