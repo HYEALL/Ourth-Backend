@@ -3,7 +3,9 @@ package gdsc.skhu.ourth.service;
 import gdsc.skhu.ourth.domain.Mission;
 import gdsc.skhu.ourth.domain.User;
 import gdsc.skhu.ourth.domain.UserMission;
+import gdsc.skhu.ourth.domain.dto.UserInfoDTO;
 import gdsc.skhu.ourth.domain.dto.UserMissionDTO;
+import gdsc.skhu.ourth.repository.BadgeRepository;
 import gdsc.skhu.ourth.repository.MissionRepository;
 import gdsc.skhu.ourth.repository.UserMissionRepository;
 import gdsc.skhu.ourth.repository.UserRepository;
@@ -14,6 +16,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 // 오늘을 기준으로 이번 주의 시작과 끝을 알아내기 위함
 import static gdsc.skhu.ourth.util.DateUtil.*;
@@ -26,6 +29,26 @@ public class UserMissionService {
     private final UserMissionRepository userMissionRepository;
     private final UserRepository userRepository;
     private final MissionRepository missionRepository;
+    private final BadgeRepository badgeRepository;
+
+    // 해당 유저의 주간 미션 목록 반환
+    public UserInfoDTO.missions findByUserMissions(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).get();
+
+        UserInfoDTO.missions missions = user.toUserInfoMissionDTO();
+
+        // 주간 미션
+        missions.setUserMissions(userMissionRepository
+                .findUserMissionByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user)
+                .stream().map(UserMission::toResponseDTO)
+                .collect(Collectors.toList()));
+
+        // 뱃지 획득 여부
+        missions.setCurrentBadge(badgeRepository
+                .findByCreateDateBetweenAndUser(getCurSunday(), getCurSaturday(), user).isPresent());
+
+        return missions;
+    }
 
     // 모든 유저에게 주간 미션 추가
     public void addUserMissionAllUser() {

@@ -48,8 +48,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("/main", "/login", "/join", "/", "/logout", "/refresh").permitAll()
                 // 인증 완료 후 [USER] 또는 [ADMIN] 권한을 가진 사용자만 접근 허용
-                .requestMatchers("/user", "/usermission/add", "usermission/clear", "/rank/**", "/badge/**").hasRole("USER")
-                .requestMatchers("/mission", "/usermission", "/usermission/all").hasRole("ADMIN")
+                .requestMatchers("/user", "/mission", "/usermission/add", "usermission/clear", "/rank/**", "/badge/**").hasRole("USER")
+                .requestMatchers("/missions", "/usermission", "/usermission/all").hasRole("ADMIN")
                 // 이외에 모든 uri 요청은 인증을 완료해야 접근 허용
                 .anyRequest().authenticated()
 

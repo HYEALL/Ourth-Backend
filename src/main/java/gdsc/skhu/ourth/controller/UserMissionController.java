@@ -1,5 +1,6 @@
 package gdsc.skhu.ourth.controller;
 
+import gdsc.skhu.ourth.domain.dto.UserInfoDTO;
 import gdsc.skhu.ourth.domain.dto.UserMissionDTO;
 import gdsc.skhu.ourth.service.UserMissionService;
 import lombok.RequiredArgsConstructor;
@@ -7,12 +8,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 public class UserMissionController {
 
     private final UserMissionService userMissionService;
+
+    // 토큰 값으로 유저의 미션 리스트 확인 - 유저
+    @GetMapping("/mission")
+    public UserInfoDTO.missions missions(Principal principal) {
+        return userMissionService.findByUserMissions(principal);
+    }
 
     @PostMapping("/usermission/all")
     public ResponseEntity<String> addUserMissionAllUser() {
