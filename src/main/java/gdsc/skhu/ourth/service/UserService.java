@@ -30,6 +30,7 @@ import org.springframework.util.ObjectUtils;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static gdsc.skhu.ourth.util.DateUtil.*;
@@ -63,8 +64,18 @@ public class UserService {
 
         }
         else {
-            if(passwordEncoder.matches(password, userRepository.findByEmail(email).get().getPassword())) {
-                password = userRepository.findByEmail(email).get().getPassword();
+            Optional<User> user = userRepository.findByEmail(email);
+
+            // 유저가 아닌 경우
+            if(user.isEmpty()) {
+                responseDTO.setStatus("BAD_REQUEST");
+                responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
+                return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
+            }
+
+            // 비밀번호가 다를 때
+            if(passwordEncoder.matches(password, user.get().getPassword())) {
+                password = user.get().getPassword();
             } else {
                 responseDTO.setStatus("BAD_REQUEST");
                 responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
@@ -79,8 +90,10 @@ public class UserService {
                 responseDTO.setMessage("이메일 인증을 완료하지 않았습니다.");
                 return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
             }
-        } catch (FirebaseAuthException e) {
-
+        } catch (FirebaseAuthException e) { // FirebaseAuthError
+            responseDTO.setStatus("BAD REQUEST");
+            responseDTO.setMessage("Firebase Error");
+            return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
         }
 
         // 1. email, password 기반으로 Authentication 객체 생성
@@ -182,7 +195,7 @@ public class UserService {
             throw new IllegalStateException("유저 이름을 입력하지 않았습니다.");
         }
 
-        // firebase user create
+        // Firebase user create
         UserRecord.CreateRequest request = new UserRecord.CreateRequest()
                 .setEmail(dto.getEmail())
                 .setEmailVerified(false)
@@ -193,6 +206,7 @@ public class UserService {
 
         UserRecord userRecord = FirebaseAuth.getInstance().createUser(request);
 
+        // Firebase Authentication Link create
         try {
             // 인증 링크 생성
             String link = FirebaseAuth.getInstance().generateEmailVerificationLink(userRecord.getEmail());
@@ -201,7 +215,7 @@ public class UserService {
             mailUtil.sendMail(userRecord.getEmail(), link);
 
         } catch (FirebaseAuthException e) {
-            System.out.println("Error generating email link: " + e.getMessage());
+            System.out.println("링크 생성 에러: " + e.getMessage());
         }
 
         // DB에 저장
