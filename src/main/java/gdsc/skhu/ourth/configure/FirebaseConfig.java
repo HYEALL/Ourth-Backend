@@ -6,6 +6,7 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,7 +17,8 @@ public class FirebaseConfig {
     // firebase init
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
-        FileInputStream firebaseKey = new FileInputStream("classpath:/resources/firebase.json");
+        ClassPathResource resource = new ClassPathResource("./src/main/resources/firebase.json");
+        FileInputStream firebaseKey = new FileInputStream(resource.getPath());
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(firebaseKey))
