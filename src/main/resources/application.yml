@@ -23,15 +23,26 @@ spring:
     redis:
       host: localhost
       port: 6379
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_ADDRESS}
+    password: ${GMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 jwt:
-  secret: Z2RzYy1za2h1LWphdmEtYmFja2VuZC1qd3Qtc3R1ZHktZGVjZW1iZXItMjh0aC1oYW5naWxsZWU=
+  secret: ${JWT_SECRET}
   access-token-validity-in-milliseconds: 1800000
   refresh-token-validity-in-milliseconds: 1209600000
 server:
   port: 8443
   ssl:
-    key-store: /etc/letsencrypt/live/ourth.duckdns.org/keystore.p12
-    key-store-password: 1212
+    key-store: ${KEY_STORE}
+    key-store-password: ${KEY_STORE_PASSWORD}
     key-store-type: pkcs12
     key-alias: tomcat
     enabled: true

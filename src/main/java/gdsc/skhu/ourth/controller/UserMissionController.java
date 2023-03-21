@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -56,6 +55,5 @@ public class UserMissionController {
         }
         return ResponseEntity.ok("해당 미션 성공");
     }
-
 
 }
