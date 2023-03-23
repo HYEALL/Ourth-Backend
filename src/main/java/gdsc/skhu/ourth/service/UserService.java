@@ -12,6 +12,7 @@ import gdsc.skhu.ourth.repository.SchoolRepository;
 import gdsc.skhu.ourth.repository.UserMissionRepository;
 import gdsc.skhu.ourth.repository.UserRepository;
 import gdsc.skhu.ourth.util.MailUtil;
+import gdsc.skhu.ourth.util.ScheduleUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -48,6 +49,7 @@ public class UserService {
     private final UserMissionRepository userMissionRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final MailUtil mailUtil;
+    private final ScheduleUtil scheduleUtil;
 
     // 로그인
     public ResponseEntity<ResponseDTO> login(UserDTO.RequestLogin dto) {
@@ -81,19 +83,19 @@ public class UserService {
                 responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
                 return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
             }
-        }
 
-        try {
-            // firebase 이메일 인증을 완료했는지 확인
-            if(!FirebaseAuth.getInstance().getUserByEmail(email).isEmailVerified()) {
+            try {
+                // firebase 이메일 인증을 완료했는지 확인
+                if(!FirebaseAuth.getInstance().getUserByEmail(email).isEmailVerified()) {
+                    responseDTO.setStatus("BAD REQUEST");
+                    responseDTO.setMessage("이메일 인증을 완료하지 않았습니다.");
+                    return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
+                }
+            } catch (FirebaseAuthException e) { // FirebaseAuthError
                 responseDTO.setStatus("BAD REQUEST");
-                responseDTO.setMessage("이메일 인증을 완료하지 않았습니다.");
+                responseDTO.setMessage("Firebase Error");
                 return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
             }
-        } catch (FirebaseAuthException e) { // FirebaseAuthError
-            responseDTO.setStatus("BAD REQUEST");
-            responseDTO.setMessage("Firebase Error");
-            return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
         }
 
         // 1. email, password 기반으로 Authentication 객체 생성
@@ -111,7 +113,7 @@ public class UserService {
         redisTemplate.opsForValue()
                 .set(tokenDTO.getRefreshToken(), "refreshToken", expiration, TimeUnit.MILLISECONDS);
 
-        // 회원가입 완료
+        // 로그인 완료
         responseDTO.setStatus("OK");
         responseDTO.setMessage("로그인을 완료했습니다.");
         responseDTO.setData(tokenDTO);
@@ -164,35 +166,35 @@ public class UserService {
     public Long signUp(UserDTO.RequestSignUp dto) throws IllegalStateException, FirebaseAuthException {
 
         if(dto.getEmail() == null || dto.getEmail().length() == 0) {
-            throw new IllegalStateException("이메일을 입력하지 않았습니다.");
+            throw new IllegalStateException("이메일을 입력해주세요");
         }
 
         if(userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalStateException("이미 존재하는 이메일입니다.");
+            throw new IllegalStateException("이미 존재하는 이메일입니다");
         }
 
         if(dto.getPassword() == null || dto.getPassword().length() == 0) {
-            throw new IllegalStateException("비밀번호를 입력하지 않았습니다.");
+            throw new IllegalStateException("비밀번호를 입력해주세요");
         }
 
         if(dto.getPassword().length() < 8) {
-            throw new IllegalStateException("비밀번호는 8글자 이상이어야 합니다.");
+            throw new IllegalStateException("비밀번호는 8글자 이상 작성해주세요");
         }
 
         if(dto.getCheckedPassword() == null || dto.getCheckedPassword().length() == 0) {
-            throw new IllegalStateException("확인 비밀번호를 입력하지 않았습니다.");
+            throw new IllegalStateException("확인 비밀번호를 입력해주세요");
         }
 
         if(!dto.getPassword().equals(dto.getCheckedPassword())) {
-            throw new IllegalStateException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalStateException("확인 비밀번호가 일치하지 않습니다");
         }
 
         if(dto.getSchoolName() == null || dto.getSchoolName().length() == 0) {
-            throw new IllegalStateException("학교명을 입력하지 않았습니다.");
+            throw new IllegalStateException("학교명을 입력해주세요");
         }
 
         if(dto.getUsername() == null || dto.getUsername().length() == 0) {
-            throw new IllegalStateException("유저 이름을 입력하지 않았습니다.");
+            throw new IllegalStateException("유저 이름을 입력해주세요");
         }
 
         // Firebase user create
@@ -223,6 +225,10 @@ public class UserService {
         dto.setSchool(school);
         User user = userRepository.save(dto.toEntity());
         user.encodePassword(passwordEncoder);
+
+        // 회원가입 취소 작업, 24시간 동안 이메일 인증을 하지 않은 경우
+        // Firebase, DB에 저장된 유저 정보 삭제 -> 회원가입은 없던 일처럼
+        scheduleUtil.executeTask(userRecord, userRepository);
 
         return user.getId();
     }
