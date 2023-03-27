@@ -64,41 +64,35 @@ public class UserService {
         HttpHeaders header = new HttpHeaders();
         header.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
 
-        // 임시로 관리자 선별하기, 만들어둔 관리자 계정은 비밀번호 암호화가 안되어있음 그래서 그냥 passwordEncoder 과정 넘김, 추후 수정 예정
-        if(email.equals("kim@naver.com")) {
+        Optional<User> user = userRepository.findByEmail(email);
 
+        // 유저가 아닌 경우
+        if(user.isEmpty()) {
+            responseDTO.setStatus("BAD_REQUEST");
+            responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
+            return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
         }
-        else {
-            Optional<User> user = userRepository.findByEmail(email);
 
-            // 유저가 아닌 경우
-            if(user.isEmpty()) {
-                responseDTO.setStatus("BAD_REQUEST");
-                responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
-                return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
-            }
+        // 비밀번호가 다를 때
+        if(passwordEncoder.matches(password, user.get().getPassword())) {
+            password = user.get().getPassword();
+        } else {
+            responseDTO.setStatus("BAD_REQUEST");
+            responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
+            return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
+        }
 
-            // 비밀번호가 다를 때
-            if(passwordEncoder.matches(password, user.get().getPassword())) {
-                password = user.get().getPassword();
-            } else {
-                responseDTO.setStatus("BAD_REQUEST");
-                responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
-                return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
-            }
-
-            try {
-                // firebase 이메일 인증을 완료했는지 확인
-                if(!FirebaseAuth.getInstance().getUserByEmail(email).isEmailVerified()) {
-                    responseDTO.setStatus("BAD REQUEST");
-                    responseDTO.setMessage("이메일 인증을 완료하지 않았습니다.");
-                    return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
-                }
-            } catch (FirebaseAuthException e) { // FirebaseAuthError
+        try {
+            // firebase 이메일 인증을 완료했는지 확인
+            if(!FirebaseAuth.getInstance().getUserByEmail(email).isEmailVerified()) {
                 responseDTO.setStatus("BAD REQUEST");
-                responseDTO.setMessage("Firebase Error");
+                responseDTO.setMessage("이메일 인증을 완료하지 않았습니다.");
                 return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
             }
+        } catch (FirebaseAuthException e) { // FirebaseAuthError
+            responseDTO.setStatus("BAD REQUEST");
+            responseDTO.setMessage("Firebase Error");
+            return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
         }
 
         // 1. email, password 기반으로 Authentication 객체 생성

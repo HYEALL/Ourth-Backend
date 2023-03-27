@@ -49,8 +49,8 @@ values ('Ajou University'),
        ('Yonsei University Mirae Campus'),
        ('Yonsei University Seoul Campus');
 
-insert into user(email, password, username, school_id, point)
-values ('kim@naver.com', 1234, '김신아', 25, 0);
+-- insert into user(email, password, username, school_id, point)
+-- values ('kim@naver.com', 1234, '김신아', 25, 0);
 
-insert into user_roles(user_user_id, roles)
-values ('1', 'ADMIN');
+-- insert into user_roles(user_user_id, roles)
+-- values ('1', 'ADMIN');
