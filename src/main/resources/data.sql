@@ -14,7 +14,10 @@ values ('Turn off the lights for 1 hour', 200),
        ('Using a cup when brushing your teeth', 200),
        ('Using a laundry net when washing', 100),
        ('Cover the pot when cooking', 100),
-       ('No straws in cafes', 200);
+       ('No straws in cafes', 200),
+       ('Going out with a tumbler today', 200),
+       ('Learn to cook and try', 200),
+       ('Maintaining the right room temperature', 200);
 
 insert into school(school_name)
 values ('Ajou University'),
