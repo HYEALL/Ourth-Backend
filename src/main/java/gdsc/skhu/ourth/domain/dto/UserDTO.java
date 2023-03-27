@@ -4,8 +4,6 @@ package gdsc.skhu.ourth.domain.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import gdsc.skhu.ourth.domain.School;
 import gdsc.skhu.ourth.domain.User;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

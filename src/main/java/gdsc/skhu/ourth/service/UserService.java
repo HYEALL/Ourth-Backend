@@ -8,6 +8,7 @@ import gdsc.skhu.ourth.domain.User;
 import gdsc.skhu.ourth.domain.UserMission;
 import gdsc.skhu.ourth.domain.dto.*;
 import gdsc.skhu.ourth.jwt.TokenProvider;
+import gdsc.skhu.ourth.repository.BadgeRepository;
 import gdsc.skhu.ourth.repository.SchoolRepository;
 import gdsc.skhu.ourth.repository.UserMissionRepository;
 import gdsc.skhu.ourth.repository.UserRepository;
@@ -33,6 +34,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static gdsc.skhu.ourth.util.DateUtil.*;
 
@@ -50,6 +52,7 @@ public class UserService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final MailUtil mailUtil;
     private final ScheduleUtil scheduleUtil;
+    private final BadgeRepository badgeRepository;
 
     // 로그인
     public ResponseEntity<ResponseDTO> login(UserDTO.RequestLogin dto) {
@@ -256,6 +259,20 @@ public class UserService {
 
         // UserInfoDTO에 학교 이름 추가
         dto.setSchoolName(dto.getSchool().getSchoolName());
+
+        return dto;
+    }
+
+    // 업적 DTO 리턴
+    public UserInfoDTO.achievement getAchievement(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).get();
+        UserInfoDTO.achievement dto = user.toAchievementDTO();
+
+        // 지금까지 완료한 미션 리스트 저장
+        dto.setUserMissions(userMissionRepository.findByUserAndStatusIsTrue(user).stream()
+                .map(UserMission::toResponseDTO).collect(Collectors.toList()));
+
+        dto.setBadgeCount(badgeRepository.countByUser(user));
 
         return dto;
     }

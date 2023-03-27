@@ -14,7 +14,9 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
     List<Badge> findByUser(User user);
 
     // 해당 기간 사이의 획득한 뱃지 목록
-
     Optional<Badge> findByCreateDateBetweenAndUser(LocalDateTime start, LocalDateTime end, User user);
+
+    // 유저의 뱃지 개수
+    Long countByUser(User user);
 
 }

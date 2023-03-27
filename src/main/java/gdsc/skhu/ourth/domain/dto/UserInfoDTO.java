@@ -43,4 +43,20 @@ public class UserInfoDTO {
 
     }
 
+    @Data
+    @Builder
+    @Getter
+    @Setter
+    public static class achievement {
+
+        private String username; // 유저 이름
+
+        private Long point; // 포인트
+
+        private Long badgeCount; // 획득한 뱃지 수
+
+        private List<UserMissionDTO.Response> userMissions; // 유저의 지금까지 완료한 미션 목록
+
+    }
+
 }

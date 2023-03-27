@@ -16,15 +16,9 @@ public class UserMissionController {
     private final UserMissionService userMissionService;
 
     // 토큰 값으로 유저의 미션 리스트 확인 - 유저
-    @GetMapping("/mission")
+    @GetMapping("/user/mission")
     public UserInfoDTO.missions missions(Principal principal) {
         return userMissionService.findByUserMissions(principal);
-    }
-
-    @PostMapping("/usermission/all")
-    public ResponseEntity<String> addUserMissionAllUser() {
-        userMissionService.addUserMissionAllUser();
-        return ResponseEntity.ok("모든 유저에게 주간 미션 추가 완료");
     }
 
     // 해당 유저에게 랜덤 미션 추가 - 유저
@@ -36,13 +30,6 @@ public class UserMissionController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok(principal.getName() + " 유저에게 주간 미션 추가 완료");
-    }
-
-    // 모든 유저에게 주어진 주간 미션 삭제하기
-    @DeleteMapping("/usermission")
-    public ResponseEntity<String> deleteAllUserMission() {
-        userMissionService.deleteAllUserMission();
-        return ResponseEntity.ok("모든 유저의 미션 삭제 완료");
     }
 
     // 유저가 미션을 완료했을 때 완료로 바꾸고 포인트 획득, user_mission_id만 주면 됨 - 유저
