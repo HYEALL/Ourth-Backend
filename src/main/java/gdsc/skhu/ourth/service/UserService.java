@@ -8,10 +8,12 @@ import gdsc.skhu.ourth.domain.User;
 import gdsc.skhu.ourth.domain.UserMission;
 import gdsc.skhu.ourth.domain.dto.*;
 import gdsc.skhu.ourth.jwt.TokenProvider;
+import gdsc.skhu.ourth.repository.BadgeRepository;
 import gdsc.skhu.ourth.repository.SchoolRepository;
 import gdsc.skhu.ourth.repository.UserMissionRepository;
 import gdsc.skhu.ourth.repository.UserRepository;
 import gdsc.skhu.ourth.util.MailUtil;
+import gdsc.skhu.ourth.util.ScheduleUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -32,6 +34,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static gdsc.skhu.ourth.util.DateUtil.*;
 
@@ -48,6 +51,8 @@ public class UserService {
     private final UserMissionRepository userMissionRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final MailUtil mailUtil;
+    private final ScheduleUtil scheduleUtil;
+    private final BadgeRepository badgeRepository;
 
     // 로그인
     public ResponseEntity<ResponseDTO> login(UserDTO.RequestLogin dto) {
@@ -59,28 +64,22 @@ public class UserService {
         HttpHeaders header = new HttpHeaders();
         header.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
 
-        // 임시로 관리자 선별하기, 만들어둔 관리자 계정은 비밀번호 암호화가 안되어있음 그래서 그냥 passwordEncoder 과정 넘김, 추후 수정 예정
-        if(email.equals("kim@naver.com")) {
+        Optional<User> user = userRepository.findByEmail(email);
 
+        // 유저가 아닌 경우
+        if(user.isEmpty()) {
+            responseDTO.setStatus("BAD_REQUEST");
+            responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
+            return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
         }
-        else {
-            Optional<User> user = userRepository.findByEmail(email);
 
-            // 유저가 아닌 경우
-            if(user.isEmpty()) {
-                responseDTO.setStatus("BAD_REQUEST");
-                responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
-                return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
-            }
-
-            // 비밀번호가 다를 때
-            if(passwordEncoder.matches(password, user.get().getPassword())) {
-                password = user.get().getPassword();
-            } else {
-                responseDTO.setStatus("BAD_REQUEST");
-                responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
-                return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
-            }
+        // 비밀번호가 다를 때
+        if(passwordEncoder.matches(password, user.get().getPassword())) {
+            password = user.get().getPassword();
+        } else {
+            responseDTO.setStatus("BAD_REQUEST");
+            responseDTO.setMessage("아이디와 비밀번호를 확인해주세요.");
+            return new ResponseEntity<>(responseDTO, header, HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -111,7 +110,7 @@ public class UserService {
         redisTemplate.opsForValue()
                 .set(tokenDTO.getRefreshToken(), "refreshToken", expiration, TimeUnit.MILLISECONDS);
 
-        // 회원가입 완료
+        // 로그인 완료
         responseDTO.setStatus("OK");
         responseDTO.setMessage("로그인을 완료했습니다.");
         responseDTO.setData(tokenDTO);
@@ -164,35 +163,35 @@ public class UserService {
     public Long signUp(UserDTO.RequestSignUp dto) throws IllegalStateException, FirebaseAuthException {
 
         if(dto.getEmail() == null || dto.getEmail().length() == 0) {
-            throw new IllegalStateException("이메일을 입력하지 않았습니다.");
+            throw new IllegalStateException("이메일을 입력해주세요");
         }
 
         if(userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalStateException("이미 존재하는 이메일입니다.");
+            throw new IllegalStateException("이미 존재하는 이메일입니다");
         }
 
         if(dto.getPassword() == null || dto.getPassword().length() == 0) {
-            throw new IllegalStateException("비밀번호를 입력하지 않았습니다.");
+            throw new IllegalStateException("비밀번호를 입력해주세요");
         }
 
         if(dto.getPassword().length() < 8) {
-            throw new IllegalStateException("비밀번호는 8글자 이상이어야 합니다.");
+            throw new IllegalStateException("비밀번호는 8글자 이상 작성해주세요");
         }
 
         if(dto.getCheckedPassword() == null || dto.getCheckedPassword().length() == 0) {
-            throw new IllegalStateException("확인 비밀번호를 입력하지 않았습니다.");
+            throw new IllegalStateException("확인 비밀번호를 입력해주세요");
         }
 
         if(!dto.getPassword().equals(dto.getCheckedPassword())) {
-            throw new IllegalStateException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalStateException("확인 비밀번호가 일치하지 않습니다");
         }
 
         if(dto.getSchoolName() == null || dto.getSchoolName().length() == 0) {
-            throw new IllegalStateException("학교명을 입력하지 않았습니다.");
+            throw new IllegalStateException("학교명을 입력해주세요");
         }
 
         if(dto.getUsername() == null || dto.getUsername().length() == 0) {
-            throw new IllegalStateException("유저 이름을 입력하지 않았습니다.");
+            throw new IllegalStateException("유저 이름을 입력해주세요");
         }
 
         // Firebase user create
@@ -224,6 +223,10 @@ public class UserService {
         User user = userRepository.save(dto.toEntity());
         user.encodePassword(passwordEncoder);
 
+        // 회원가입 취소 작업, 24시간 동안 이메일 인증을 하지 않은 경우
+        // Firebase, DB에 저장된 유저 정보 삭제 -> 회원가입은 없던 일처럼
+        scheduleUtil.executeTask(userRecord, userRepository);
+
         return user.getId();
     }
 
@@ -250,6 +253,20 @@ public class UserService {
 
         // UserInfoDTO에 학교 이름 추가
         dto.setSchoolName(dto.getSchool().getSchoolName());
+
+        return dto;
+    }
+
+    // 업적 DTO 리턴
+    public UserInfoDTO.achievement getAchievement(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).get();
+        UserInfoDTO.achievement dto = user.toAchievementDTO();
+
+        // 지금까지 완료한 미션 리스트 저장
+        dto.setUserMissions(userMissionRepository.findByUserAndStatusIsTrue(user).stream()
+                .map(UserMission::toResponseDTO).collect(Collectors.toList()));
+
+        dto.setBadgeCount(badgeRepository.countByUser(user));
 
         return dto;
     }

@@ -58,4 +58,10 @@ public class UserController {
         return userService.userInfo(principal);
     }
 
+    // 유저의 업적 확인 - 유저
+    @GetMapping("/user/achieve")
+    public UserInfoDTO.achievement userAchievement(Principal principal) {
+        return userService.getAchievement(principal);
+    }
+
 }

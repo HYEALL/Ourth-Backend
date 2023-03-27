@@ -71,6 +71,14 @@ public class User extends BaseTime implements UserDetails {
                 .build();
     }
 
+    // 업적용
+    public UserInfoDTO.achievement toAchievementDTO() {
+        return UserInfoDTO.achievement.builder()
+                .username(username)
+                .point(point)
+                .build();
+    }
+
     // 계정의 권한 목록을 리턴
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

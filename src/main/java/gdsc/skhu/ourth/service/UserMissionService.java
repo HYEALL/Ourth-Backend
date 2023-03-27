@@ -50,34 +50,6 @@ public class UserMissionService {
         return missions;
     }
 
-    // 모든 유저에게 주간 미션 추가
-    public void addUserMissionAllUser() {
-        // 모든 유저들을 가져옴
-        List<User> users = userRepository.findAll();
-        List<Mission> missions = missionRepository.findAll();
-
-        // 1부터 미션 총 개수만큼 수를 리스트 num에 넣어둠
-        ArrayList<Long> num = new ArrayList<>();
-        for(int i = 1; i <= missions.size(); i++) {
-            num.add((long) i);
-        }
-
-        // 유저 하나씩 접근
-        for (User user : users) {
-            // num을 섞은 후 앞에 4개만 가져오면 랜덤과 같은 효과
-            Collections.shuffle(num);
-            for (int j = 0; j < 4; j++) {
-                Mission mission = missionRepository.findById(num.get(j)).get();
-                UserMissionDTO.RequestAddUserMission dto = new UserMissionDTO.RequestAddUserMission();
-                dto.setUser(user);
-                dto.setMission(mission);
-                dto.setStatus(false);
-                userMissionRepository.save(dto.toEntity());
-            }
-        }
-
-    }
-
     // 해당 유저에게 주간 미션 추가
     public void addUserMissionToUser(Principal principal) throws IllegalStateException {
         User user = userRepository.findByEmail(principal.getName()).get();
@@ -124,11 +96,6 @@ public class UserMissionService {
         User user = userRepository.findById(userMission.getUser().getId()).get();
         user.setPoint(user.getPoint() + userMission.getMission().toResponseDTO().getPoint());
         userRepository.save(user);
-    }
-
-    // 모든 유저의 주간 미션 삭제
-    public void deleteAllUserMission() {
-        userMissionRepository.deleteAll();
     }
 
 }

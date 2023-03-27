@@ -11,4 +11,5 @@ public interface UserMissionRepository extends JpaRepository<UserMission, Long> 
 
     List<UserMission> findUserMissionByCreateDateBetweenAndUser(LocalDateTime start, LocalDateTime end, User user);
 
+    List<UserMission> findByUserAndStatusIsTrue(User user);
 }
